@@ -23,7 +23,24 @@ dependencies {
     // This dependency is used internally, and not exposed to consumers on their own compile classpath.
     implementation 'com.google.guava:guava:23.0'
 
-    // Use JUnit test framework
-    testImplementation 'junit:junit:4.12'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.3.1'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.3.1'
+    
+    // https://mvnrepository.com/artifact/nz.ac.waikato.cms.weka/weka-stable
+	compile group: 'nz.ac.waikato.cms.weka', name: 'weka-stable', version: '3.8.3'
+	
+	// https://mvnrepository.com/artifact/commons-io/commons-io (apache commons)
+	compile group: 'commons-io', name: 'commons-io', version: '2.6'
+	
+	// https://mvnrepository.com/artifact/com.googlecode.matrix-toolkits-java/mtj
+	compile group: 'com.googlecode.matrix-toolkits-java', name: 'mtj', version: '1.0.4'
+
+	
+	
+    
+}
+
+test {
+    useJUnitPlatform()
 }
 
