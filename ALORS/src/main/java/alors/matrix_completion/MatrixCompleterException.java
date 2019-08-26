@@ -9,9 +9,6 @@ package alors.matrix_completion;
  */
 public class MatrixCompleterException extends Exception {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = -683055500590824039L;
 	
 	public MatrixCompleterException(String msg) {

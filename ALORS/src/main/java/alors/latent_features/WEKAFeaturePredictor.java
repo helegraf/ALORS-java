@@ -1,7 +1,12 @@
 package alors.latent_features;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Classifier;
 import weka.classifiers.trees.RandomForest;
 import weka.core.Attribute;
@@ -16,10 +21,17 @@ import weka.core.Instances;
  */
 public class WEKAFeaturePredictor implements FeaturePredictor {
 	
+	// logging
+	private Logger logger = LoggerFactory.getLogger(WEKAFeaturePredictor.class);
+	
+	// options
 	private String classifierName = new RandomForest().getClass().getName();
 	private String[] classifierOptions = new RandomForest().getOptions();
+	
+	// results
 	private ArrayList<Classifier> regressors = new ArrayList<>();
 	private ArrayList<Instances> datasets= new ArrayList<>();
+	private boolean isPrepared = false;
 
 	@Override
 	public void train(double[][] featureMatrixX, double[][] featureMatrixU) throws FeaturePredictorException {
@@ -42,19 +54,26 @@ public class WEKAFeaturePredictor implements FeaturePredictor {
 		}
 		
 		// train classifiers
+		logger.debug("Predicting with {}, options {}", classifierName, Arrays.toString(classifierOptions));
 		for (int i = 0; i < datasets.size(); i++) {
 			//TODO update
-			regressors.add(new RandomForest());
 			try {
+				regressors.add(AbstractClassifier.forName(classifierName, classifierOptions));
 				regressors.get(i).buildClassifier(datasets.get(i));
-			} catch (Exception e) {
-				throw new FeaturePredictorException(e);
+			} catch (Exception e1) {
+				throw new FeaturePredictorException(e1);
 			}
 		}
+		
+		isPrepared = true;
 	}
 	
 	@Override
 	public double[] predict(double[] featureVectorX) throws FeaturePredictorException {
+		if (!isPrepared) {
+			throw new FeaturePredictorException("Predictor has not been prepared!");
+		}
+		
 		double[] results = new double[regressors.size()];
 		
 		for (int i = 0; i < regressors.size(); i++) {
@@ -75,6 +94,10 @@ public class WEKAFeaturePredictor implements FeaturePredictor {
 	   System.arraycopy(source, 0, destination, 0, source.length);
 	   destination[source.length] = element;
 	   return destination;
+	}
+
+	public boolean isPrepared() {
+		return isPrepared;
 	}
 
 }

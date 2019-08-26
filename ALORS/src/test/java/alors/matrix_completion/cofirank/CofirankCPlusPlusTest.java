@@ -1,5 +1,7 @@
 package alors.matrix_completion.cofirank;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.Arrays;
@@ -7,23 +9,41 @@ import java.util.Arrays;
 import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.condition.DisabledOnOs;
+import org.junit.jupiter.api.condition.EnabledOnOs;
 import org.junit.jupiter.api.condition.OS;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import alors.matrix_completion.MatrixCompleterException;
-import alors.matrix_completion.cofirank.CofiConfig;
-import alors.matrix_completion.cofirank.CofirankCPlusPlus;
 
+/**
+ * Tests {@link CofirankCPlusPlus}.
+ * 
+ * @author helegraf
+ *
+ */
 public class CofirankCPlusPlusTest {
 	
+	private Logger logger = LoggerFactory.getLogger(CofirankCPlusPlusTest.class);
+	
+	/**
+	 * Clean up all testing directories.
+	 * 
+	 * @throws IOException
+	 */
 	@AfterEach
 	public void cleanUp() throws IOException {
 		FileUtils.cleanDirectory(Paths.get("cofirank","config").toFile());
 		FileUtils.cleanDirectory(Paths.get("cofirank","default_out").toFile());
 	}
 
+	/**
+	 * Tests the functionality of cofirank for a very small problem. Only available under the OS for which cofirank has been compiled, default linux.
+	 * 
+	 * @throws MatrixCompleterException
+	 */
 	@Test
-	@DisabledOnOs(OS.WINDOWS)
+	@EnabledOnOs(OS.LINUX)
 	public void testComplete() throws MatrixCompleterException {
 		String executablePath = Paths.get("cofirank","dist","cofirank-deploy").toString();
 		String configurationPath = Paths.get("cofirank","config","default.cfg").toString();
@@ -31,7 +51,9 @@ public class CofirankCPlusPlusTest {
 		String trainFilePath = Paths.get("cofirank","data","dummytrain.lsvm").toString();
 		String testFilePath = Paths.get("cofirank","data","dummytest.lsvm").toString();
 		
+		int dimW = 10;
 		CofiConfig config = new CofiConfig(executablePath, configurationPath, outFolderPath, trainFilePath, testFilePath);
+		config.setDimW(dimW);
 		CofirankCPlusPlus cofirank = new CofirankCPlusPlus(config);
 
 		double nan = Double.NaN;
@@ -39,18 +61,31 @@ public class CofirankCPlusPlusTest {
 				{ 1, 2, nan, nan, 4, 5 }, { 2, nan, 1, 5, 5, nan }, { nan, 1, 2, 4, nan, 5 } };
 		double[][] completedMatrix = cofirank.complete(matrix);
 		
-		printMatrix(completedMatrix);
+		logger.info("M_head Matrix", matrixToString(completedMatrix));
 		
 		double[][] u = cofirank.getU();
-		printMatrix(u);
+		logger.info("U Matrix", matrixToString(u));
 		
 		double[][] v = cofirank.getV();
-		printMatrix(v);
+		logger.info("V Matrix", matrixToString(v));
+		
+		// Check dimensions of results for basic working check
+		assertEquals(matrix.length,completedMatrix.length);
+		assertEquals(matrix[0].length, completedMatrix[0].length);
+		
+		assertEquals(dimW, u[0].length);
+		assertEquals(dimW, v[0].length);
+		
+		assertEquals(matrix.length, u.length);
+		assertEquals(matrix.length, v.length);
 	}
 	
-	public void printMatrix(double[][] m) {
+	private String matrixToString(double[][] m) {
+		StringBuffer buffer = new StringBuffer();
 		for (int i = 0; i < m.length; i++) {
-			System.out.println(Arrays.toString(m[i]));
+			buffer.append(Arrays.toString(m[i]));
+			buffer.append(System.lineSeparator());
 		}
+		return buffer.toString();
 	}
 }

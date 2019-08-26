@@ -9,13 +9,14 @@ package alors.latent_features;
  */
 public class FeaturePredictorException extends Exception {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 4087026993950208774L;
 
 	public FeaturePredictorException(Throwable cause) {
 		super(cause);
+	}
+
+	public FeaturePredictorException(String message) {
+		super(message);
 	}
 
 }

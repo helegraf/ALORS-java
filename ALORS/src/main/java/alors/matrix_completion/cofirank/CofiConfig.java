@@ -5,6 +5,9 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * Represents a configuration for {@link CofirankCPlusPlus}. Holds parameters
  * neccessary for executing cofirank and can create configuration files to be
@@ -14,6 +17,9 @@ import java.io.IOException;
  *
  */
 public class CofiConfig {
+	// logging
+	private Logger logger = LoggerFactory.getLogger(CofiConfig.class);
+	
 	// Where COFI
 	private String executablePath;
 	private String configurationPath;
@@ -71,6 +77,7 @@ public class CofiConfig {
 	 */
 	public String createConfig() throws IOException {
 		File newConfig = new File(configurationPath);
+		logger.debug("Writing configuration to {}",newConfig.getAbsolutePath());
 
 		try (BufferedWriter writer = new BufferedWriter(new FileWriter(newConfig))) {
 

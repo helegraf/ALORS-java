@@ -11,6 +11,9 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import alors.matrix_completion.MatrixCompleterException;
 import alors.matrix_completion.ModelBasedMatrixCompleter;
 
@@ -31,6 +34,10 @@ import alors.matrix_completion.ModelBasedMatrixCompleter;
  */
 public class CofirankCPlusPlus implements ModelBasedMatrixCompleter {
 
+	//logging 
+	private Logger logger = LoggerFactory.getLogger(CofirankCPlusPlus.class);
+	
+	// configuration
 	private CofiConfig config;
 
 	/**
@@ -58,6 +65,7 @@ public class CofirankCPlusPlus implements ModelBasedMatrixCompleter {
 			String command = config.getExecutablePath() + " " + configPath;
 
 			// Running the above command
+			logger.info("Running Cofirank");
 			Runtime run = Runtime.getRuntime();
 			Process proc = run.exec(command);
 
@@ -99,7 +107,8 @@ public class CofirankCPlusPlus implements ModelBasedMatrixCompleter {
 	}
 
 	private void writeLSVMMatrix(String location, double[][] matrix) throws IOException {
-		System.out.println("writing to " + location);
+		logger.debug("Writing matrix to {}", location);
+		
 		try (BufferedWriter writer = new BufferedWriter(new FileWriter(new File(location)))) {
 			for (int i = 0; i < matrix.length; i++) {
 				for (int j = 0; j < matrix[i].length; j++) {
@@ -132,7 +141,8 @@ public class CofirankCPlusPlus implements ModelBasedMatrixCompleter {
 	}
 
 	private double[][] parseNonSparseLSVM(String locationRelativeToCOFIOutFolder) throws IOException {
-		System.out.println("Parsing " + locationRelativeToCOFIOutFolder);
+		logger.debug("Parsing matrix {}",locationRelativeToCOFIOutFolder);
+		
 		try (BufferedReader reader = new BufferedReader(
 				new FileReader(Paths.get(config.getOutFolderPath(), locationRelativeToCOFIOutFolder).toString()))) {
 			String line = reader.readLine();

@@ -1,5 +1,8 @@
 package alors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import alors.latent_features.FeaturePredictor;
 import alors.latent_features.FeaturePredictorException;
 import alors.latent_features.WEKAFeaturePredictor;
@@ -17,8 +20,17 @@ import alors.matrix_completion.ModelBasedMatrixCompleter;
  */
 public class Alors {
 
+	//logging
+	private Logger logger = LoggerFactory.getLogger(Alors.class);
+	
+	// parameters
 	private ModelBasedMatrixCompleter matrixCompleter;
 	private FeaturePredictor featurePredictor = new WEKAFeaturePredictor();
+	
+	// results
+	private double[][] v;
+	private boolean isPrepared = false;
+	
 
 	/**
 	 * Initialize Alors using the given matrix completer, which has to be model
@@ -47,11 +59,15 @@ public class Alors {
 	public double[][] completeMatrixAndPrepareColdStart(double[][] matrixM, double[][] matrixX)
 			throws MatrixCompleterException, FeaturePredictorException {
 		// do matrix completion for M
+		logger.debug("Completing matrix with matrix completer {}", matrixCompleter.getClass());
 		double[][] mHead = matrixCompleter.complete(matrixM);
+		v = matrixCompleter.getV();
 
 		// train model for feature vector
+		logger.debug("Training feature predictor {}", featurePredictor.getClass());
 		featurePredictor.train(matrixX, matrixCompleter.getU());
 
+		isPrepared = true;
 		return mHead;
 	}
 
@@ -63,14 +79,27 @@ public class Alors {
 	 *         the case of algorithm selection
 	 * @throws FeaturePredictorException if the latent features for the instance
 	 *                                   could not be predicted
+	 * @throws AlorsException if Alors has not been prepared for prediction
 	 */
-	public double[] predictForFeatures(double[] featureVectorX) throws FeaturePredictorException {
+	public double[] predictForFeatures(double[] featureVectorX) throws FeaturePredictorException, AlorsException {
+		if (!isPrepared) {
+			throw new AlorsException("Alors has not been prepared for predictions.");
+		}
+		
 		// feed into prediction model for rf; then multiply latent feature vector with
 		// algorithm feature vector matrix
 		double[] latentFeatures = featurePredictor.predict(featureVectorX);
+		
+		double[] result = new double[v.length];
+		for (int i = 0; i < v.length; i++) {
+			double entry = 0;
+			for (int j = 0; j < v[i].length; j++) {
+				entry += latentFeatures[j] * v[i][j];
+			}
+			result [i] = entry;
+		}
 
-		// TODO multiply with the predicted matrix!!
-		return latentFeatures;
+		return result;
 	}
 
 	public ModelBasedMatrixCompleter getMatrixCompleter() {
@@ -87,5 +116,9 @@ public class Alors {
 
 	public void setFeaturePredictor(FeaturePredictor featurePredictor) {
 		this.featurePredictor = featurePredictor;
+	}
+
+	public boolean isPrepared() {
+		return isPrepared;
 	}
 }

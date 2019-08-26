@@ -11,9 +11,6 @@ import alors.matrix_completion.MatrixCompleterException;
  */
 public class CofiException extends MatrixCompleterException {
 
-	/**
-	* 
-	*/
 	private static final long serialVersionUID = 6268379980300404390L;
 
 	public CofiException(String msg) {
