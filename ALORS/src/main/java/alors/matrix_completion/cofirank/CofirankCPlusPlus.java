@@ -42,10 +42,10 @@ public class CofirankCPlusPlus implements ModelBasedMatrixCompleter {
 
 	/**
 	 * Creates a new Cofirank wrapper using the given configuration. Any execution
-	 * of {@link #complete(double[][])} will exdcute cofirank with this
+	 * of {@link #complete(double[][])} will execute cofirank with this
 	 * configuration.
 	 * 
-	 * @param config
+	 * @param config the configuration to be used
 	 */
 	public CofirankCPlusPlus(CofiConfig config) {
 		this.config = config;

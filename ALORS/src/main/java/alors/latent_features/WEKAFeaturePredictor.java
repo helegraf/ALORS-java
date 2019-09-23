@@ -56,7 +56,6 @@ public class WEKAFeaturePredictor implements FeaturePredictor {
 		// train classifiers
 		logger.debug("Predicting with {}, options {}", classifierName, Arrays.toString(classifierOptions));
 		for (int i = 0; i < datasets.size(); i++) {
-			//TODO update
 			try {
 				regressors.add(AbstractClassifier.forName(classifierName, classifierOptions));
 				regressors.get(i).buildClassifier(datasets.get(i));
